@@ -1,0 +1,31 @@
+name: Synchronize develop with master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  sync-developer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+      - name: Fetch all branches
+        run: git fetch --all
+
+      - name: Checkout Developer Branch
+        run: git checkout developer
+
+      - name: Merge Main into Developer
+        run: git merge origin/main
+
+      - name: Push Changes to Developer Branch
+        run: |
+          git push origin developer
