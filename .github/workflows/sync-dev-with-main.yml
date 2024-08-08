@@ -24,7 +24,7 @@ jobs:
         run: git checkout develop
 
       - name: Merge Main into Develop
-        run: git merge origin/main
+        run: git merge origin/master
 
       - name: Push Changes to Develop Branch
         run: |
