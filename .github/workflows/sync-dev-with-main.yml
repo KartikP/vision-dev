@@ -24,7 +24,7 @@ jobs:
         run: git checkout develop
 
       - name: Merge Main into Develop
-        run: git merge origin/master --allow-unrelated-histories
+        run: git merge -X theirs origin/master || true
 
       - name: Push Changes to Develop Branch
         run: |
