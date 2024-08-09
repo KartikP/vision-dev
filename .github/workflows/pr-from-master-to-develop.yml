@@ -17,11 +17,13 @@ jobs:
       contains(github.event.pull_request.title, 'brain-score.org submission'))
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: develop
-          head: master
           title: 'Sync master with developer'
           body: 'This PR syncs changes from master to developer for non-web submissions. Please review before merging.'
