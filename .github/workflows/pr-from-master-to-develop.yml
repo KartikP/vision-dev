@@ -19,11 +19,25 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure Develop is Up to Date
+        run: |
+          git fetch origin
+          git checkout develop
+          git reset --hard origin/develop
+
+      - name: Ensure Master is Up to Date
+        run: |
+          git fetch origin
+          git checkout master
+          git reset --hard origin/master
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: develop
-          title: 'Sync master with developer'
-          body: 'This PR syncs changes from master to developer for non-web submissions. Please review before merging.'
+          title: Sync master with develop
+          body: This PR syncs changes from master to develop for non-web submissions. Please review before merging.
