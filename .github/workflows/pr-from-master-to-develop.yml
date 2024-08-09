@@ -46,4 +46,4 @@ jobs:
           title: "Resolve conflicts between master and develop"
           body: "This PR resolves merge conflicts between master and develop."
           base: develop
-          branch: develop-merge-$(date +%s)
+          branch: develop-sync-${{ github.run_id }}  # Use GitHub Actions run ID for a unique branch name
