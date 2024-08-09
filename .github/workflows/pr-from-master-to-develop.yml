@@ -34,6 +34,12 @@ jobs:
           git checkout master
           git reset --hard origin/master
 
+      - name: Check Differences Between Master and Develop
+        run: |
+          git fetch origin
+          echo "Differences between master and develop:"
+          git log origin/develop..origin/master --oneline
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
