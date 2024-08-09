@@ -1,0 +1,27 @@
+name: Create PR from master to develop for non-web submissions
+
+on:
+  pull_request:
+    types: [ closed ]
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  create-pr:
+    if: >
+      github.event.pull_request.merged == true && 
+      !(startsWith(github.event.pull_request.head.ref, 'web_submission_') && 
+      contains(github.event.pull_request.title, 'brain-score.org submission'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: develop
+          head: master
+          title: 'Sync master with developer'
+          body: 'This PR syncs changes from master to developer for non-web submissions. Please review before merging.'

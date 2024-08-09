@@ -1,0 +1,30 @@
+name: Sync develop with master after web submissions
+
+on:
+  pull_request:
+    types: [ closed ]
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  sync-developer:
+    if: >
+      github.event.pull_request.merged == true && 
+      startsWith(github.event.pull_request.head.ref, 'web_submission_') && 
+      contains(github.event.pull_request.title, 'brain-score.org submission')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Develop Branch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git fetch origin
+          git checkout develop
+
+      - name: Merge Master into Develop
+        run: |
+          git merge origin/master --allow-unrelated-histories || true
+          git push origin develop
