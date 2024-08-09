@@ -2,7 +2,7 @@ name: Create PR from master to develop for non-web submissions
 
 on:
   pull_request:
-    types: [ closed ]
+    types: [closed]
     branches:
       - master
 
@@ -17,33 +17,19 @@ jobs:
       contains(github.event.pull_request.title, 'brain-score.org submission'))
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the 'develop' branch
+      # Step 1: Checkout the 'master' branch
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch full history
-          ref: develop
+          ref: master
 
-      # Step 2: Merge 'master' into 'develop'
-      - name: Merge master into develop
-        run: |
-          git fetch origin
-          git checkout develop
-          git merge origin/master
-
-      # Step 3: Push the changes (if merge is successful)
-      - name: Push changes to develop
-        if: success()
-        run: |
-          git push origin develop
-
-      # Step 4: Handle merge conflicts and create PR if needed
-      - name: Create Pull Request if conflicts
-        if: failure()  # This runs if the merge step fails (indicating conflicts)
+      # Step 2: Create Pull Request to merge 'master' into 'develop'
+      - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Merge master into develop with conflict resolution"
-          title: "Resolve conflicts between master and develop"
-          body: "This PR resolves merge conflicts between master and develop."
-          base: develop
+          commit-message: "Sync master into develop"
+          title: "Sync master into develop"
+          body: "This PR syncs the latest changes from the master branch into the develop branch."
+          base: develop  # Target branch for the PR
           branch: develop-sync-${{ github.run_id }}  # Use GitHub Actions run ID for a unique branch name
