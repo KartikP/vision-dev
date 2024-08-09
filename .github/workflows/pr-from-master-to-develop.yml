@@ -44,6 +44,7 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: develop
+          branch: develop-PR
+          base: develop
           title: Sync master with develop
           body: This PR syncs changes from master to develop for non-web submissions. Please review before merging.
