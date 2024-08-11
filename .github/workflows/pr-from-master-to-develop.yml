@@ -30,9 +30,9 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.PAT }} # Expires after a year.
           commit-message: "Sync master into develop"
           title: "Sync master into develop"
           body: "This PR syncs the latest changes from the master branch into the develop branch."
           base: develop  # Target branch for the PR
-          branch: developer-promotion
+          branch: developer-promotion-${{ github.run_id }}  # Use GitHub Actions run ID for a unique branch name
