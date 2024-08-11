@@ -23,10 +23,16 @@ jobs:
           fetch-depth: 0  # Fetch full history
           ref: develop
 
+      # Step 1.5: Configure Git user
+      - name: Configure Git user
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+
       # Step 2: Merge 'master' into 'develop'
       - name: Merge master into develop
         run: |
-          git fetch origin
+          git fetch origin master
           git checkout develop
           git merge origin/master
 
@@ -41,7 +47,7 @@ jobs:
         if: failure()  # This runs if the merge step fails (indicating conflicts)
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
           commit-message: "Merge master into develop with conflict resolution"
           title: "Resolve conflicts between master and develop"
           body: "This PR resolves merge conflicts between master and develop."
