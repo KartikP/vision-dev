@@ -30,7 +30,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Sync master into develop"
           title: "Sync master into develop"
           body: "This PR syncs the latest changes from the master branch into the develop branch."
