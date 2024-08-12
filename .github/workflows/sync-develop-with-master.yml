@@ -46,7 +46,7 @@ jobs:
           title: "Sync master into develop"
           body: "This PR syncs the latest changes from the master branch into the develop branch."
           base: develop  # Target branch for the PR
-          branch: developer-sync-pr-${{ github.run_id }}  # Use GitHub Actions run ID for a unique branch name
+          branch: developer-sync-pr-${{ github.event.pull_request.number }}
 
   auto_sync_for_plugin:
     needs: start  # This job now needs the 'start' job to complete first
@@ -81,7 +81,6 @@ jobs:
               exit 1
             fi
           }
-
       - name: Push changes to develop (if rebase is successful)
         if: steps.rebase.outcome == 'success'
         run: |
