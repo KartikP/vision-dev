@@ -1,1 +1,1 @@
-Brain-score submission
+Non-Brain-score submission
