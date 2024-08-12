@@ -1,2 +1,1 @@
-Triggering merged workflow.
-Triggering webtest
+Triggering workflow.
