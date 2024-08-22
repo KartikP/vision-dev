@@ -18,7 +18,7 @@ jobs:
           echo "Starting branch synchronization of ${{ github.repository }}"
   create_pr_for_nonplugin:
     name: Synchronizing non-plugin PR
-    needs: start
+    needs: start  # This job now needs the 'start' job to complete first
     if: >
       github.event.pull_request.merged == true && 
       !(startsWith(github.event.pull_request.head.ref, 'web_submission_') && 
@@ -28,7 +28,7 @@ jobs:
       - name: Check out the develop branch
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Fetch full history
           ref: develop
       - name: Reset the develop branch
         run: |
@@ -61,13 +61,15 @@ jobs:
           ref: develop
       - name: Configure Git user
         run: |
-          git config --global user.name "GitHub Action"
+          git config --global user.name "Branch Synchronizer"
           git config --global user.email "action@github.com"
       - name: Ensure develop branch is updated
         run: |
           git fetch origin develop
           git checkout develop
           git merge origin/develop
+      # Fetch latest change from master, checkout develop, merge changes from master to develop.
+      # Includes conflict handling
       - name: Merge master into develop
         id: merge
         run: |
@@ -84,8 +86,13 @@ jobs:
           }
       - name: Push changes to develop (if merge is successful)
         if: steps.merge.conclusion == 'success'
-        run: |
-          git push origin develop --force-with-lease
+        run: | #Use force-with-lease to prevent accidental overwrite if branch has been updated. If fails, rebase the update and retry
+          git push origin develop --force-with-lease || {
+            echo "Push failed due to updates in develop. Attempting to rebase and retry..."
+            git fetch origin develop
+            git rebase origin/develop
+            git push origin develop --force-with-lease
+          }
       - name: Create pull request for merge conflicts
         if: steps.merge.outputs.merge_conflict == 'true'
         uses: peter-evans/create-pull-request@v6
@@ -99,8 +106,7 @@ jobs:
       - name: Handle other merge failures
         if: failure() && steps.merge.outputs.merge_conflict != 'true'
         run: >
-          echo "Handle non-conflict related failure, such as network issues or
-          missing branches"
+          echo "Handle non-conflict related failure, such as network issues or missing branches"
   
           # Possibly incorporate additional handling logic here (e.g.,
           notifications or retries)
