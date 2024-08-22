@@ -63,6 +63,11 @@ jobs:
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
+      - name: Ensure develop branch is updated
+        run: |
+          git fetch origin develop
+          git checkout develop
+          git merge origin/develop
       - name: Merge master into develop
         id: merge
         run: |
@@ -77,13 +82,6 @@ jobs:
               exit 1
             fi
           }
-      - name: Ensure develop branch hasn't diverged
-        run: |
-          git fetch origin develop
-          if ! git diff --quiet origin/develop; then
-            echo "Branch has diverged, aborting push"
-            exit 1
-          fi
       - name: Push changes to develop (if merge is successful)
         if: steps.merge.conclusion == 'success'
         run: |
