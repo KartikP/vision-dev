@@ -1,27 +1,24 @@
 name: Sync develop with master
-
-on:
+'on':
   pull_request:
-    types: [closed]
+    types:
+      - closed
     branches:
       - master
-
 permissions:
   contents: write
-
 jobs:
   start:
-    name: "Starting -🤞"
+    name: "Starting -\U0001F91E"
     runs-on: ubuntu-latest
     steps:
       - name: Starting
-        id : init
+        id: init
         run: |
           echo "Starting branch synchronization of ${{ github.repository }}"
-
   create_pr_for_nonplugin:
-    name: "Synchronizing non-plugin PR"
-    needs: start  # This job now needs the 'start' job to complete first
+    name: Synchronizing non-plugin PR
+    needs: start
     if: >
       github.event.pull_request.merged == true && 
       !(startsWith(github.event.pull_request.head.ref, 'web_submission_') && 
@@ -31,26 +28,25 @@ jobs:
       - name: Check out the develop branch
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch full history
+          fetch-depth: 0
           ref: develop
-
       - name: Reset the develop branch
         run: |
           git fetch origin master
           git reset --hard origin/master
-
       - name: Create pull request in develop
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.PAT }} # Expires after a year.
-          commit-message: "Sync master into develop"
-          title: "Sync master into develop"
-          body: "This PR syncs the latest changes from the master branch into the develop branch."
-          base: develop  # Target branch for the PR
-          branch: developer-sync-pr-${{ github.event.pull_request.number }}
-
+          token: '${{ secrets.PAT }}'
+          commit-message: Sync master into develop
+          title: Sync master into develop
+          body: >-
+            This PR syncs the latest changes from the master branch into the
+            develop branch.
+          base: develop
+          branch: 'developer-sync-pr-${{ github.event.pull_request.number }}'
 auto_sync_for_plugin:
-  needs: start  # This job now needs the 'start' job to complete first
+  needs: start
   if: >
     github.event.pull_request.merged == true && 
     startsWith(github.event.pull_request.head.ref, 'web_submission_') && 
@@ -60,17 +56,15 @@ auto_sync_for_plugin:
     - name: Checkout the develop branch
       uses: actions/checkout@v3
       with:
-        fetch-depth: 0  # Fetch full history
+        fetch-depth: 0
         ref: develop
-
     - name: Configure Git user
       run: |
         git config --global user.name "GitHub Action"
         git config --global user.email "action@github.com"
-
     - name: Merge master into develop
-      id: merge  # Used to check status of this step below
-      run: |  # Attempt to merge master into develop
+      id: merge
+      run: |
         git fetch origin master
         git checkout develop
         git merge origin/master || {
@@ -82,7 +76,6 @@ auto_sync_for_plugin:
             exit 1
           fi
         }
-
     - name: Ensure develop branch hasn't diverged
       run: |
         git fetch origin develop
@@ -90,28 +83,25 @@ auto_sync_for_plugin:
           echo "Branch has diverged, aborting push"
           exit 1
         fi
-
     - name: Push changes to develop (if merge is successful)
       if: steps.merge.conclusion == 'success'
       run: |
         git push origin develop --force-with-lease
-
     - name: Create pull request for merge conflicts
       if: steps.merge.outputs.merge_conflict == 'true'
       uses: peter-evans/create-pull-request@v6
       with:
-        token: ${{ secrets.PAT }}
-        commit-message: "Merge master into develop with conflict resolution"
-        title: "Resolve conflicts between master and develop"
-        body: "This PR resolves merge conflicts between master and develop."
+        token: '${{ secrets.PAT }}'
+        commit-message: Merge master into develop with conflict resolution
+        title: Resolve conflicts between master and develop
+        body: This PR resolves merge conflicts between master and develop.
         base: develop
-        branch: developer-sync-pr-conflict-${{ github.event.pull_request.number }}
-
+        branch: 'developer-sync-pr-conflict-${{ github.event.pull_request.number }}'
     - name: Handle other merge failures
       if: failure() && steps.merge.outputs.merge_conflict != 'true'
-      run: |
-        echo "Handle non-conflict related failure, such as network issues or missing branches"
-        # Possibly incorporate additional handling logic here (e.g., notifications or retries)
+      run: >
+        echo "Handle non-conflict related failure, such as network issues or
+        missing branches"
 
-
-# Check PAT token expiration. Considering using Slack as a way to notify when current date is approaching expiration date
+        # Possibly incorporate additional handling logic here (e.g.,
+        notifications or retries)
