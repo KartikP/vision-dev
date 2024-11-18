@@ -44,19 +44,19 @@ jobs:
           fetch-depth: 0
           ref: develop
           
-      - name: Reset Develop to Master
+      - name: Merge Master into Develop
         run: |
           git fetch origin master
-          git reset --hard origin/master
+          git merge --no-ff origin/master
 
       - name: Create Pull Request for Develop Sync
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ env.TOKEN }}
-          commit-message: Sync master into develop for non-plugin PR ${{ github.event.pull_request.number }}
-          title: Sync master into develop for non-plugin PR ${{ github.event.pull_request.number }}
+          commit-message: Merge master into develop for non-plugin PR ${{ github.event.pull_request.number }}
+          title: Merge master into develop for non-plugin PR ${{ github.event.pull_request.number }}
           body: >-
-            This PR syncs the latest changes from the master branch into the
+            This PR merges the latest changes from the master branch into the
             develop branch for non-plugin updates.
           base: develop
           branch: 'developer-sync-pr-${{ github.event.pull_request.number }}'
@@ -87,10 +87,10 @@ jobs:
           fetch-depth: 0
           ref: develop
           
-      - name: Reset Develop to Master
+      - name: Merge Master into Develop
         run: |
           git fetch origin master
-          git reset --hard origin/master
+          git merge --no-ff origin/master
 
       - name: Push Develop
         run: |
