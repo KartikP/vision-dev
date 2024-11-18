@@ -27,6 +27,11 @@ jobs:
       contains(github.event.pull_request.title, 'brain-score.org submission'))
     runs-on: ubuntu-latest
     steps:
+      - name: Set Git User Identity
+        run: |
+          git config --global user.name "Branch Sync Bot"
+          git config --global user.email "BranchSyncBot@github.com"
+
       - name: Set Token Priority
         id: set-token
         run: |
@@ -44,19 +49,19 @@ jobs:
           fetch-depth: 0
           ref: develop
           
-      - name: Reset Develop to Master
+      - name: Merge Master into Develop
         run: |
           git fetch origin master
-          git reset --hard origin/master
+          git merge --no-ff origin/master
 
       - name: Create Pull Request for Develop Sync
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ env.TOKEN }}
-          commit-message: Sync master into develop for non-plugin PR ${{ github.event.pull_request.number }}
-          title: Sync master into develop for non-plugin PR ${{ github.event.pull_request.number }}
+          commit-message: Merge master into develop for non-plugin PR ${{ github.event.pull_request.number }}
+          title: Merge master into develop for non-plugin PR ${{ github.event.pull_request.number }}
           body: >-
-            This PR syncs the latest changes from the master branch into the
+            This PR merges the latest changes from the master branch into the
             develop branch for non-plugin updates.
           base: develop
           branch: 'developer-sync-pr-${{ github.event.pull_request.number }}'
@@ -70,6 +75,11 @@ jobs:
       contains(github.event.pull_request.title, 'brain-score.org submission')
     runs-on: ubuntu-latest
     steps:
+      - name: Set Git User Identity
+        run: |
+          git config --global user.name "Branch Sync Bot"
+          git config --global user.email "BranchSyncBot@github.com"
+
       - name: Set Token Priority
         id: set-token
         run: |
@@ -87,10 +97,10 @@ jobs:
           fetch-depth: 0
           ref: develop
           
-      - name: Reset Develop to Master
+      - name: Merge Master into Develop
         run: |
           git fetch origin master
-          git reset --hard origin/master
+          git merge --no-ff origin/master
 
       - name: Push Develop
         run: |
