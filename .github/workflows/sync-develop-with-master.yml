@@ -53,12 +53,12 @@ jobs:
         id: rebase
         run: |
           git fetch origin master
-          git checkout -b sync-temp-branch-${{ github.run_id }}
+          git checkout -b Developer-Sync-Nonplugin-${{ github.run_id }}
           git rebase origin/master || echo "conflict=true" >> $GITHUB_ENV
 
       - name: Push Temporary Branch to Remote
         run: |
-          git push origin sync-temp-branch-${{ github.run_id }}
+          git push origin Developer-Sync-Nonplugin-${{ github.run_id }}
 
       - name: Create Pull Request for Rebased Changes
         uses: peter-evans/create-pull-request@v6
@@ -70,15 +70,7 @@ jobs:
             This PR rebases the changes from the master branch into the develop branch.
             Please review and merge.
           base: develop
-          branch: 'developer-sync-Nonplugin-${{ github.event.pull_request.number }}'
-          
-      - name: Cleanup Temporary Branch Locally and Remotely
-        if: success()
-        run: |
-          # Delete the local branch
-          git branch -D sync-temp-branch-${{ github.run_id }}
-          # Delete the remote branch
-          git push origin --delete sync-temp-branch-${{ github.run_id }}
+          branch: 'Developer-Sync-Nonplugin-${{ github.run_id }}'
 
   auto_sync_for_plugin:
     name: Sync Plugin Changes Directly
@@ -132,4 +124,4 @@ jobs:
           body: >-
             This PR rebases the develop branch onto the master branch. Conflicts need to be resolved manually.
           base: develop
-          branch: 'developer-sync-pluginConflict-${{ github.event.pull_request.number }}'
+          branch: 'Developer-Sync-PluginConflict-${{ github.event.pull_request.number }}'
