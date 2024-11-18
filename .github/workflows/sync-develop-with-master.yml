@@ -47,14 +47,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          ref: master
+          ref: develop
           
       - name: Fetch and Reset Local Master
         run: |
           git fetch origin develop
           git fetch origin master
-          git checkout master
-          git reset --hard origin/master
 
       - name: Log Branch Differences
         run: |
@@ -63,25 +61,21 @@ jobs:
           echo "Differences between master and develop:"
           git log origin/master..origin/develop --oneline
 
-      - name: Create Temporary Branch from Master
+      - name: Soft Reset Develop to Master
         run: |
-          git checkout -b Developer-Sync-Nonplugin-${{ github.run_id }} origin/master
+          git reset --soft origin/master
+          git add -A
+          git commit -m "Sync master into develop for non-plugin PR #${{ github.event.pull_request.number }}"
 
-      - name: Rebase Develop Onto Temporary Branch
+      - name: Log Branch State After Reset
         run: |
-          git rebase origin/develop || {
-            echo "Rebase conflict detected. Exiting workflow."
-            exit 1
-          }
-
-      - name: Log Branch State After Rebase
-        run: |
-          echo "After Rebase:"
+          echo "After Reset:"
           git log --oneline --graph -10
 
-      - name: Push Temporary Branch to Remote
+      - name: Push Temporary Branch
         run: |
-          git push origin Developer-Sync-Nonplugin-${{ github.run_id }}
+          git checkout -b developer-sync-pr-${{ github.event.pull_request.number }}
+          git push origin developer-sync-pr-${{ github.event.pull_request.number }}
 
       - name: Create Pull Request for Rebased Changes
         uses: peter-evans/create-pull-request@v6
