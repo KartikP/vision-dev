@@ -49,19 +49,15 @@ jobs:
           fetch-depth: 0
           ref: develop
           
-      - name: Fetch and Reset Local Master
+      - name: Create Temporary Branch
         run: |
-          git fetch origin develop
+          git checkout -b Developer-Sync-Nonplugin-${{ github.run_id }}
+
+      - name: Fetch Master
+        run: |
           git fetch origin master
 
-      - name: Log Branch Differences
-        run: |
-          echo "Differences between develop and master:"
-          git log origin/develop..origin/master --oneline
-          echo "Differences between master and develop:"
-          git log origin/master..origin/develop --oneline
-
-      - name: Soft Reset Develop to Master
+      - name: Soft Reset Temporary Branch to Master
         run: |
           git reset --soft origin/master
           git add -A
@@ -74,7 +70,6 @@ jobs:
 
       - name: Push Temporary Branch
         run: |
-          git checkout -b Developer-Sync-Nonplugin-${{ github.run_id }}
           git push origin Developer-Sync-Nonplugin-${{ github.run_id }}
 
       - name: Create Pull Request for Rebased Changes
