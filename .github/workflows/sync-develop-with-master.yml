@@ -27,6 +27,11 @@ jobs:
       contains(github.event.pull_request.title, 'brain-score.org submission'))
     runs-on: ubuntu-latest
     steps:
+      - name: Set Git User Identity
+        run: |
+          git config --global user.name "Branch Sync Bot"
+          git config --global user.email "BranchSyncBot@github.com"
+
       - name: Set Token Priority
         id: set-token
         run: |
@@ -70,6 +75,11 @@ jobs:
       contains(github.event.pull_request.title, 'brain-score.org submission')
     runs-on: ubuntu-latest
     steps:
+      - name: Set Git User Identity
+        run: |
+          git config --global user.name "Branch Sync Bot"
+          git config --global user.email "BranchSyncBot@github.com"
+
       - name: Set Token Priority
         id: set-token
         run: |
