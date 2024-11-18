@@ -49,10 +49,12 @@ jobs:
           fetch-depth: 0
           ref: master
           
-      - name: Fetch and Reset Local Develop
+      - name: Fetch and Reset Local Master
         run: |
-          git fetch origin master
           git fetch origin develop
+          git fetch origin master
+          git checkout master
+          git reset --hard origin/master
 
       - name: Log Branch Differences
         run: |
