@@ -28,11 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the develop branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: develop
-
           
       - name: Set Git User Identity
         run: |
@@ -107,7 +106,7 @@ jobs:
           fi
 
       - name: Checkout Develop Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: develop
