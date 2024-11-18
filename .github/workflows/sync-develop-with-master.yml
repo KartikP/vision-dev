@@ -42,7 +42,13 @@ jobs:
             echo "Using fallback GITHUB_TOKEN"
             echo "TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
           fi
-
+          
+      - name: Checkout Develop Branch
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: develop
+          
       - name: Fetch and Reset Local Develop
         run: |
           git fetch origin develop
