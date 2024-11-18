@@ -47,12 +47,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          ref: develop
           
       - name: Fetch and Reset Local Develop
         run: |
           git fetch origin master
-          git reset --hard origin/master
+          git fetch origin develop
 
       - name: Log Branch Differences
         run: |
@@ -61,16 +60,21 @@ jobs:
           echo "Differences between master and develop:"
           git log origin/master..origin/develop --oneline
 
-      - name: Rebase Temporary Branch onto Master
-        id: rebase
+      - name: Create Temporary Branch from Master
         run: |
-          git checkout -b Developer-Sync-Nonplugin-${{ github.run_id }}
-          git rebase origin/master || echo "conflict=true" >> $GITHUB_ENV
+          git checkout -b Developer-Sync-Nonplugin-${{ github.run_id }} origin/master
 
-      - name: Log After Rebase
+      - name: Rebase Develop Onto Temporary Branch
+        run: |
+          git rebase origin/develop || {
+            echo "Rebase conflict detected. Exiting workflow."
+            exit 1
+          }
+
+      - name: Log Branch State After Rebase
         run: |
           echo "After Rebase:"
-          git log --oneline --graph -5
+          git log --oneline --graph -10
 
       - name: Push Temporary Branch to Remote
         run: |
