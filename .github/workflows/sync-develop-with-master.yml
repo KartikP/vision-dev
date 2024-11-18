@@ -19,7 +19,7 @@ jobs:
         run: echo "Starting branch synchronization of ${{ github.repository }}"
 
   create_pr_for_nonplugin:
-    name: Create PR for Non-Plugin Changes
+    name: Synchronizing non-plugin PR
     needs: start
     if: >
       github.event.pull_request.merged == true && 
@@ -27,55 +27,52 @@ jobs:
       contains(github.event.pull_request.title, 'brain-score.org submission'))
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout the develop branch
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: develop
+
+          
       - name: Set Git User Identity
         run: |
           git config --global user.name "Branch Sync Bot"
           git config --global user.email "BranchSyncBot@github.com"
 
-      - name: Set Token Priority
-        id: set-token
-        run: |
-          if [ -n "${{ secrets.PAT }}" ]; then
-            echo "Using PAT token"
-            echo "TOKEN=${{ secrets.PAT }}" >> $GITHUB_ENV
-          else
-            echo "Using fallback GITHUB_TOKEN"
-            echo "TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
-          fi
-          
-      - name: Checkout Develop Branch
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: develop
-          
-      - name: Create Temporary Branch
-        run: |
-          git checkout -b Developer-Sync-Nonplugin-${{ github.run_id }}
-
-      - name: Fetch Master
+      - name: Fetch All Branches
         run: |
           git fetch origin master
+          git fetch origin develop
 
-      - name: Soft Reset Temporary Branch to Master
+      - name: Create Temporary Branch from Master
         run: |
-          git reset --soft origin/master
-          git add -A
-          git commit -m "Sync master into develop for non-plugin PR #${{ github.event.pull_request.number }}"
+          git checkout -b Developer-Sync-Nonplugin-${{ github.run_id }} origin/master
 
-      - name: Log Branch State After Reset
+      - name: Log Differences Between Branches
         run: |
-          echo "After Reset:"
-          git log --oneline --graph -10
+          echo "Differences between master and develop:"
+          git log origin/master..origin/develop --oneline
+          echo "Differences between develop and master:"
+          git log origin/develop..origin/master --oneline
 
-      - name: Push Temporary Branch
+      - name: Rebase Temporary Branch onto Develop
         run: |
-          git push origin Developer-Sync-Nonplugin-${{ github.run_id }}
+          git rebase origin/develop || echo "conflict=true" >> $GITHUB_ENV
 
-      - name: Create Pull Request for Rebased Changes
+      - name: Check for Rebase Conflicts
+        if: env.conflict == 'true'
+        run: |
+          echo "Rebase conflicts detected. Manual resolution required."
+          exit 1
+
+      - name: Push Temporary Branch to Remote
+        run: |
+          git push origin Developer-Sync-Nonplugin-${{ github.run_id }} --force
+
+      - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ env.TOKEN }}
+          token: '${{ secrets.PAT }}'
           commit-message: Rebase master into develop for non-plugin PR ${{ github.event.pull_request.number }}
           title: Sync master into develop for non-plugin PR ${{ github.event.pull_request.number }}
           body: >-
