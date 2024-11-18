@@ -43,33 +43,30 @@ jobs:
             echo "TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
           fi
 
-      - name: Checkout Develop Branch
+      - name: Checkout Temporary Branch from Develop
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           ref: develop
-          
-      - name: Rebase Develop onto Master
+
+      - name: Rebase Temporary Branch onto Master
         id: rebase
         run: |
           git fetch origin master
+          git checkout -b sync-temp-branch-${{ github.run_id }}
           git rebase origin/master || echo "conflict=true" >> $GITHUB_ENV
-
-      - name: Push Rebased Develop
-        if: env.conflict != 'true'
-        run: |
-          git push origin develop --force-with-lease
 
       - name: Create Pull Request for Rebased Changes
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ env.TOKEN }}
-          commit-message: Rebase develop onto master for non-plugin PR ${{ github.event.pull_request.number }}
+          commit-message: Rebase master into develop for non-plugin PR ${{ github.event.pull_request.number }}
           title: Rebase master into develop for non-plugin PR ${{ github.event.pull_request.number }}
           body: >-
-            This PR rebases the develop branch onto the master branch. Please review and merge.
+            This PR rebases the changes from the master branch into the develop branch.
+            Please review and merge.
           base: develop
-          branch: 'developer-sync-pr-${{ github.event.pull_request.number }}'
+          branch: 'developer-sync-Nonplugin-${{ github.event.pull_request.number }}'
 
   auto_sync_for_plugin:
     name: Sync Plugin Changes Directly
@@ -123,4 +120,4 @@ jobs:
           body: >-
             This PR rebases the develop branch onto the master branch. Conflicts need to be resolved manually.
           base: develop
-          branch: 'developer-sync-pr-conflict-${{ github.event.pull_request.number }}'
+          branch: 'developer-sync-pluginConflict-${{ github.event.pull_request.number }}'
