@@ -43,11 +43,18 @@ jobs:
             echo "TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
           fi
 
-      - name: Checkout Temporary Branch from Develop
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: develop
+      - name: Fetch and Reset Local Develop
+        run: |
+          git fetch origin develop
+          git checkout develop
+          git reset --hard origin/develop
+
+      - name: Log Branch Differences
+        run: |
+          echo "Differences between develop and master:"
+          git log origin/develop..origin/master --oneline
+          echo "Differences between master and develop:"
+          git log origin/master..origin/develop --oneline
 
       - name: Rebase Temporary Branch onto Master
         id: rebase
@@ -56,12 +63,10 @@ jobs:
           git checkout -b Developer-Sync-Nonplugin-${{ github.run_id }}
           git rebase origin/master || echo "conflict=true" >> $GITHUB_ENV
 
-      - name: Check for Changes After Rebase
+      - name: Log After Rebase
         run: |
-          if git diff --quiet origin/develop; then
-            echo "No changes after rebase. Exiting workflow."
-            exit 0
-          fi
+          echo "After Rebase:"
+          git log --oneline --graph -5
 
       - name: Push Temporary Branch to Remote
         run: |
