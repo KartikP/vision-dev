@@ -38,35 +38,9 @@ jobs:
           git config --global user.name "Branch Sync Bot"
           git config --global user.email "BranchSyncBot@github.com"
 
-      - name: Fetch All Branches
+      - name: Fetch changes from master
         run: |
           git fetch origin master
-          git fetch origin develop
-
-      - name: Create Temporary Branch from Master
-        run: |
-          git checkout -b Developer-Sync-Nonplugin-${{ github.run_id }} origin/master
-
-      - name: Log Differences Between Branches
-        run: |
-          echo "Differences between master and develop:"
-          git log origin/master..origin/develop --oneline
-          echo "Differences between develop and master:"
-          git log origin/develop..origin/master --oneline
-
-      - name: Rebase Temporary Branch onto Develop
-        run: |
-          git rebase origin/develop || echo "conflict=true" >> $GITHUB_ENV
-
-      - name: Check for Rebase Conflicts
-        if: env.conflict == 'true'
-        run: |
-          echo "Rebase conflicts detected. Manual resolution required."
-          exit 1
-
-      - name: Push Temporary Branch to Remote
-        run: |
-          git push origin Developer-Sync-Nonplugin-${{ github.run_id }} --force
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
